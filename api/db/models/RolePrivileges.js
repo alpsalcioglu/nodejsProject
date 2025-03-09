@@ -18,4 +18,4 @@ class RolePrivileges extends mongoose.Model{
 
 
 schema.loadClass(RolePrivileges);
-module.exports = mongoose.model('RolePrivileges',schema);
+module.exports = mongoose.model('Role_Privileges',schema);

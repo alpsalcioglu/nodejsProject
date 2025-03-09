@@ -1,13 +1,17 @@
 const express = require('express');
+const router = express.Router();
 const bcrypt = require('bcrypt-nodejs');
 const is = require('is_js');
+const jwt = require('jwt-simple');
 const Users = require('../db/models/Users');
+
 const Response = require('../lib/Response');
 const CustomError = require('../lib/Error');
 const Enum = require('../config/Enum');
-const router = express.Router();
 const UserRoles = require('../db/models/UserRoles');
 const Roles = require('../db/models/Roles');
+const config = require('../config');
+
 
 /* GET users listing. */
 router.get('/', async(req, res)=> {
@@ -82,7 +86,7 @@ router.post('/update', async(req,res)=>{
     if(!body._id) throw new CustomError(Enum.HTTP_CODES.BAD_GATEWAY, "Validation Error!", "_id fields must be filled");
 
     if(body.password && body.password.length < Enum.PASS_LENGTH){
-      updated.password = bcrypt.hashSync(body.password, bcrypt.genSaltSync(8), null);
+      updates.password = bcrypt.hashSync(body.password, bcrypt.genSaltSync(8), null);
     }
 
     if(typeof body.is_active === "boolean") updates.is_active = body.is_active;
@@ -191,4 +195,40 @@ router.post('/register', async(req,res)=>{
     res.status(errorResponse.code).json(errorResponse);
   }
 });
+
+router.post('/auth', async(req, res)=>{
+  try{
+    let {email, password} = req.body;
+    
+    Users.validateFieldsBeforeAuth(email, password);
+
+    let user = await Users.findOne({email});
+
+    if(!user){
+      throw new CustomError(Enum.HTTP_CODES.UNAUTHORIZED, "Validation Error", "Email or password is wrong!");
+    }
+    if(!user.validPassword(password)){
+      throw new CustomError(Enum.HTTP_CODES.UNAUTHORIZED, "Validation Error", "Email or password is wrong!");
+    }
+
+    let payload = {
+      id: user._id,
+      exp: parseInt(Date.now() / 1000) * config.JWT.EXPIRE_TIME
+    };
+
+    let userData = {
+      _id: user._id,
+      first_name: user.first_name,
+      last_name: user.first_name
+    }
+
+    let token = jwt.encode(payload, config.JWT.SECRET);
+
+    res.json(Response.successResponse({token, user: userData}));
+
+  }catch(err){
+    let errorResponse = Response.errorResponse(err);
+    res.status(errorResponse.code).json(errorResponse);
+  }
+})
 module.exports = router;

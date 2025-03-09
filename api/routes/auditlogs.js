@@ -4,6 +4,7 @@ const router = express.Router();
 const Response = require('../lib/Response');
 const AuditLogs = require('../db/models/AuditLogs');
 
+
 router.post('/', async (req, res)=> {
     
     try{
@@ -12,10 +13,10 @@ router.post('/', async (req, res)=> {
         let skip= body.skip;
         let limit= body.limit;
 
-        if(typeof body.skip !== "numeric"){
+        if(typeof body.skip !== "number"){
             skip=0;
         }
-        if(typeof(body.limit !== "numeric") || body.limit >500){
+        if(typeof body.limit !== "number" || body.limit >500){
             limit = 500;
         }
 

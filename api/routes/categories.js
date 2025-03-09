@@ -8,7 +8,7 @@ const AuditLogs = require('../lib/AuditLogs');
 const logger = require('../lib/logger/LoggerClass');
 
 /* GET users listing. */
-router.get('/', async(req, res, next) => {
+router.get('/', async(req, res) => {
     try{
         let categories = await Categories.find({});
         

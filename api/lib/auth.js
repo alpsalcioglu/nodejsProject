@@ -19,11 +19,11 @@ module.exports = function(){
         if(user){
             let userRoles = await UserRoles.find({user_id: payload.id});
 
-            let RolePrivileges = await RolePrivileges.find({role_id: {$in: userRoles.map(ur=>ur.role_id)}});
+            let RolePrivilege = await RolePrivileges.find({role_id: {$in: userRoles.map(ur=>ur.role_id)}});
 
             done(null, {
                 id: user._id,
-                roles: RolePrivileges,
+                roles: RolePrivilege,
                 email: user.email,
                 first_name: user.first_name,
                 last_name: user.last_name,

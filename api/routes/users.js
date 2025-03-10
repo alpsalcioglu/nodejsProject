@@ -12,6 +12,7 @@ const UserRoles = require('../db/models/UserRoles');
 const Roles = require('../db/models/Roles');
 const config = require('../config');
 const auth = require('../lib/auth')();
+const i18n = new (require('../lib/i18n'))(config.DEFAULT_LANG);
 
 router.post('/register', async(req,res)=>{
   let body = req.body;
@@ -22,11 +23,11 @@ router.post('/register', async(req,res)=>{
       return res.sendStatus(Enum.HTTP_CODES.NOT_FOUND);
     }
 
-    if(!body.email) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!","Email field must be filled!");
+    if(!body.email) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language), i18n.translate("COMMON.FIELD_MUST_BE_FILLED", req.user.language, ["Email"]));
 
-    if(is.not.email(body.email)) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!","Email field must be an email format!");
+    if(is.not.email(body.email)) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language), i18n.translate("COMMON.FIELD_MUST_BE_TYPE", req.user.language, ["Email", "Email Format"]));
 
-    if(!body.password) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!","Password field must be filled!");
+    if(!body.password) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language), i18n.translate("COMMON.FIELD_MUST_BE_FILLED", req.user.language, ["Password"]));
 
     if(body.password.length < Enum.PASS_LENGTH){
       throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "Password length must be greater than " + Enum.PASS_LENGTH);
@@ -76,10 +77,10 @@ router.post('/auth', async(req, res)=>{
     let user = await Users.findOne({email});
 
     if(!user){
-      throw new CustomError(Enum.HTTP_CODES.UNAUTHORIZED, "Validation Error", "Email or password is wrong!");
+      throw new CustomError(Enum.HTTP_CODES.UNAUTHORIZED, i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language), i18n.translate("USERS.AUTH_ERROR", req.user.language));
     }
     if(!user.validPassword(password)){
-      throw new CustomError(Enum.HTTP_CODES.UNAUTHORIZED, "Validation Error", "Email or password is wrong!");
+      throw new CustomError(Enum.HTTP_CODES.UNAUTHORIZED, i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language), i18n.translate("USERS.AUTH_ERROR", req.user.language));
     }
 
     let payload = {
@@ -125,24 +126,24 @@ router.post('/add', auth.checkRoles("user_add"), async(req,res)=>{
   let body = req.body;
   try{
 
-    if(!body.email) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Valitation Error!","Email field must be filled!");
+    if(!body.email) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language), i18n.translate("COMMON.FIELD_MUST_BE_FILLED", req.user.language, ["Email"]));
 
-    if(is.not.email(body.email)) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Valitation Error!","Email field must be an email format!");
+    if(is.not.email(body.email)) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language), i18n.translate("USERS.EMAIL_FORMAT_ERROR", req.user.language));
 
-    if(!body.password) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Valitation Error!","Password field must be filled!");
+    if(!body.password) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language), i18n.translate("COMMON.FIELD_MUST_BE_FILLED", req.user.language, ["Password"]));
 
     if(body.password.length < Enum.PASS_LENGTH){
-      throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "Password length must be greater than " + Enum.PASS_LENGTH);
+      throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language), i18n.translate("USERS.PASSWORD_LENGTH_ERROR", req.user.language, [Enum.PASS_LENGTH]));
     }
 
     if(!body.roles || !Array.isArray(body.roles) || body.roles.length == 0){
-      throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!","Roles field must be an array");
+      throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language), i18n.translate("COMMON.FIELD_MUST_BE_TYPE", req.user.language, ["Roles", "Array"]));
     }
 
     let roles = await Roles.find({_id: {$in: body.roles}});
 
     if(roles.length == 0 ){
-      throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!","Roles field must be an array");
+      throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language), i18n.translate("COMMON.FIELD_MUST_BE_TYPE", req.user.language, ["Roles", "Array"]));
 
     }
     let password = bcrypt.hashSync(body.password, bcrypt.genSaltSync(8),null);
@@ -176,7 +177,7 @@ router.post('/update', async(req,res)=>{
   let updates = {};
   try{
 
-    if(!body._id) throw new CustomError(Enum.HTTP_CODES.BAD_GATEWAY, "Validation Error!", "_id fields must be filled");
+    if(!body._id) throw new CustomError(Enum.HTTP_CODES.BAD_GATEWAY, i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language), i18n.translate("COMMON.FIELD_MUST_BE_TYPE", req.user.language, ["Roles", "Array"]));
 
     if(body.password && body.password.length < Enum.PASS_LENGTH){
       updates.password = bcrypt.hashSync(body.password, bcrypt.genSaltSync(8), null);
@@ -222,7 +223,7 @@ router.post('/delete', auth.checkRoles("user_delete"), async(req,res)=>{
   let body = req.body;
   try{
 
-    if(!body._id) throw new CustomError(Enum.HTTP_CODES.BAD_GATEWAY, "Validation Error!", "_id fields must be filled");
+    if(!body._id) throw new CustomError(Enum.HTTP_CODES.BAD_GATEWAY, i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language), i18n.translate("COMMON.FIELD_MUST_BE_FILLED", req.user.language, ["Id"]));
 
     await Users.deleteOne({_id: body._id});
 

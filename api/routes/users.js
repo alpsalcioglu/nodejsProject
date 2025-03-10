@@ -107,7 +107,7 @@ router.all("*",auth.authenticate(),(req,res,next)=>{
     next();
 });
 /* GET users listing. */
-router.get('/', async(req, res)=> {
+router.get('/', auth.checkRoles("user_view"), async(req, res)=> {
 
   try{
     let users = await Users.find({});
@@ -121,7 +121,7 @@ router.get('/', async(req, res)=> {
   }
 });
 
-router.post('/add', async(req,res)=>{
+router.post('/add', auth.checkRoles("user_add"), async(req,res)=>{
   let body = req.body;
   try{
 
@@ -218,7 +218,7 @@ router.post('/update', async(req,res)=>{
   }
 });
 
-router.post('/delete', async(req,res)=>{
+router.post('/delete', auth.checkRoles("user_delete"), async(req,res)=>{
   let body = req.body;
   try{
 

@@ -14,7 +14,7 @@ router.all("*",auth.authenticate(),(req,res,next)=>{
 });
 
 /* GET users listing. */
-router.get('/', async(req, res)=> {
+router.get('/', auth.checkRoles("role_view"), async(req, res)=> {
     try{
         let roles = await Roles.find({});
 
@@ -27,7 +27,7 @@ router.get('/', async(req, res)=> {
     }
 });
 
-router.post('/add', async(req, res)=>{
+router.post('/add', auth.checkRoles("role_add"), async(req, res)=>{
     let body = req.body;
     try{
 
@@ -109,7 +109,7 @@ router.post('/update', async(req, res)=>{
     }
 });
 
-router.post('/delete', async(req, res)=>{
+router.post('/delete', auth.checkRoles("role_delete"), async(req, res)=>{
     let body = req.body;
     try{
 

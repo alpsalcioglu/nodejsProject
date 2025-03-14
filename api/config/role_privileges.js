@@ -74,6 +74,12 @@ module.exports = {
             description: "Category view"
         },
         {
+            key: "category_export", 
+            name: "Category EXPORT", 
+            group: "CATEGORY", 
+            description: "Category export"
+        },
+        {
             key: "category_add", 
             name: "User Add", 
             group: "CATEGORY", 
